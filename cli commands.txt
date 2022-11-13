@@ -1,0 +1,534 @@
+# Generate RADIUS Sessions
+# The packet must contain a unique Calling-Station-Id and Framed-IP-Address in order to push the session to pxGrid
+echo User-Name:=jsmith,User-Password=cisco,Calling-Station-Id=`echo $RANDOM|md5sum|head -c 12`,Called-Station-Id=66-55-44-33-22-11,Framed-IP-Address=4.3.2.3|radclient -x 10.207.216.147 auth cisco
+
+# Create pkcs12 file from certificate and private key
+Enter Export Password:
+Verifying - Enter Export Password:
+
+# Service Lookup com.cisco.ise.session
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceLookup --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"com.cisco.ise.session"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.session",
+      "nodeName": "~ise-mnt-vb-cl-ise-mnt1",
+      "properties": {
+        "sessionTopic": "/topic/com.cisco.ise.session",
+        "groupTopic": "/topic/com.cisco.ise.session.group",
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseURL": "https://vb-cl-ise-mnt1.ciscodemo.net:8910/pxgrid/mnt/sd",
+        "restBaseUrl": "https://vb-cl-ise-mnt1.ciscodemo.net:8910/pxgrid/mnt/sd"
+      }
+    },
+    {
+      "name": "com.cisco.ise.session",
+      "nodeName": "~ise-mnt-vb-cl-ise-mnt2",
+      "properties": {
+        "sessionTopic": "/topic/com.cisco.ise.session",
+        "groupTopic": "/topic/com.cisco.ise.session.group",
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseURL": "https://vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/mnt/sd",
+        "restBaseUrl": "https://vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/mnt/sd"
+      }
+    }
+  ]
+}
+# If called multiple times, services are returned in different order
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.session",
+      "nodeName": "~ise-mnt-vb-cl-ise-mnt2",
+      "properties": {
+        "sessionTopic": "/topic/com.cisco.ise.session",
+        "groupTopic": "/topic/com.cisco.ise.session.group",
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseURL": "https://vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/mnt/sd",
+        "restBaseUrl": "https://vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/mnt/sd"
+      }
+    },
+    {
+      "name": "com.cisco.ise.session",
+      "nodeName": "~ise-mnt-vb-cl-ise-mnt1",
+      "properties": {
+        "sessionTopic": "/topic/com.cisco.ise.session",
+        "groupTopic": "/topic/com.cisco.ise.session.group",
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseURL": "https://vb-cl-ise-mnt1.ciscodemo.net:8910/pxgrid/mnt/sd",
+        "restBaseUrl": "https://vb-cl-ise-mnt1.ciscodemo.net:8910/pxgrid/mnt/sd"
+      }
+    }
+  ]
+}
+
+# Get Access Secret
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccessSecret --cert pxgrid-client.crt --key pxgrid-client.key -d '{"peerNodeName": "~ise-mnt-vb-cl-ise-mnt2"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "secret": "UeQJ1kSzV8WgPSur"
+}
+
+# Get All sessions
+$ curl -s https://pxgrid-client:UeQJ1kSzV8WgPSur@vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/mnt/sd/getSessions -d '{}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "sessions": [
+    {
+      "timestamp": "2022-11-10T14:06:24.222-05:00",
+      "state": "AUTHENTICATED",
+      "userName": "jsmith",
+      "callingStationId": "00:50:56:A4:89:5A",
+      "calledStationId": "200.200.200.200",
+      "auditSessionId": "ac1f1c1000005000636d4bb0",
+      "ipAddresses": [
+        "172.31.28.192"
+      ],
+      "macAddress": "00:50:56:A4:89:5A",
+      "nasIpAddress": "172.31.28.16",
+      "nasPortType": "Virtual",
+      "endpointProfile": "Unknown",
+      "adNormalizedUser": "jsmith",
+      "providers": [
+        "None"
+      ],
+      "endpointCheckResult": "none",
+      "identitySourcePortStart": 0,
+      "identitySourcePortEnd": 0,
+      "identitySourcePortFirst": 0,
+      "networkDeviceProfileName": "Cisco",
+      "ssid": "200.200.200.200",
+      "mdmRegistered": false,
+      "mdmCompliant": false,
+      "mdmDiskEncrypted": false,
+      "mdmJailBroken": false,
+      "mdmPinLocked": false,
+      "selectedAuthzProfiles": [
+        "PermitAccess"
+      ],
+      "authMethod": "PAP_ASCII",
+      "authProtocol": "PAP_ASCII"
+    },
+    {
+      "timestamp": "2022-11-09T23:54:55.541-05:00",
+      "state": "AUTHENTICATED",
+      "userName": "jsmith",
+      "callingStationId": "1.2.3.5",
+      "ipAddresses": [
+        "1.2.3.5"
+      ],
+      "adNormalizedUser": "jsmith",
+      "adUserDomainName": "merck.com",
+      "providers": [
+        "Rest"
+      ],
+      "endpointCheckResult": "none",
+      "identitySourcePortStart": 0,
+      "identitySourcePortEnd": 0,
+      "identitySourcePortFirst": 0,
+      "mdmRegistered": false,
+      "mdmCompliant": false,
+      "mdmDiskEncrypted": false,
+      "mdmJailBroken": false,
+      "mdmPinLocked": false
+    },
+    {
+      "timestamp": "2022-11-10T19:45:31.364-05:00",
+      "state": "AUTHENTICATED",
+      "userName": "jsmith",
+      "callingStationId": "29:84:A9:B2:71:69",
+      "calledStationId": "66:55:44:33:22:11",
+      "ipAddresses": [
+        "4.3.2.3"
+      ],
+      "macAddress": "29:84:A9:B2:71:69",
+      "adNormalizedUser": "jsmith",
+      "providers": [
+        "None"
+      ],
+      "endpointCheckResult": "none",
+      "identitySourcePortStart": 0,
+      "identitySourcePortEnd": 0,
+      "identitySourcePortFirst": 0,
+      "networkDeviceProfileName": "Cisco",
+      "ssid": "66-55-44-33-22-11",
+      "mdmRegistered": false,
+      "mdmCompliant": false,
+      "mdmDiskEncrypted": false,
+      "mdmJailBroken": false,
+      "mdmPinLocked": false,
+      "selectedAuthzProfiles": [
+        "PermitAccess"
+      ],
+      "authMethod": "PAP_ASCII",
+      "authProtocol": "PAP_ASCII"
+    },
+    {
+      "timestamp": "2022-11-10T19:54:38.111-05:00",
+      "state": "AUTHENTICATED",
+      "userName": "jsmith",
+      "callingStationId": "76:1A:FC:F3:A7:B0",
+      "calledStationId": "66:55:44:33:22:11",
+      "ipAddresses": [
+        "4.3.2.3"
+      ],
+      "macAddress": "76:1A:FC:F3:A7:B0",
+      "adNormalizedUser": "jsmith",
+      "providers": [
+        "None"
+      ],
+      "endpointCheckResult": "none",
+      "identitySourcePortStart": 0,
+      "identitySourcePortEnd": 0,
+      "identitySourcePortFirst": 0,
+      "networkDeviceProfileName": "Cisco",
+      "ssid": "66-55-44-33-22-11",
+      "mdmRegistered": false,
+      "mdmCompliant": false,
+      "mdmDiskEncrypted": false,
+      "mdmJailBroken": false,
+      "mdmPinLocked": false,
+      "selectedAuthzProfiles": [
+        "PermitAccess"
+      ],
+      "authMethod": "PAP_ASCII",
+      "authProtocol": "PAP_ASCII"
+    }
+  ]
+}
+
+# Get Session Recovery
+$ curl -s https://pxgrid-client:UeQJ1kSzV8WgPSur@vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/mnt/sd/getSessionsForRecovery -d '{"startTimestamp":"2022-11-10T19:54:38.111-05:00"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+
+
+# Service Lookup com.cisco.ise.pubsub
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceLookup --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"com.cisco.ise.pubsub"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.pubsub",
+      "nodeName": "~ise-pubsub-vb-cl-ise-px1",
+      "properties": {
+        "wsUrl": "wss://vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/ise/pubsub"
+      }
+    },
+    {
+      "name": "com.cisco.ise.pubsub",
+      "nodeName": "~ise-pubsub-vb-cl-ise-px2",
+      "properties": {
+        "wsUrl": "wss://vb-cl-ise-px2.ciscodemo.net:8910/pxgrid/ise/pubsub"
+      }
+    }
+  ]
+}
+
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.pubsub",
+      "nodeName": "~ise-pubsub-vb-cl-ise-px2",
+      "properties": {
+        "wsUrl": "wss://vb-cl-ise-px2.ciscodemo.net:8910/pxgrid/ise/pubsub"
+      }
+    },
+    {
+      "name": "com.cisco.ise.pubsub",
+      "nodeName": "~ise-pubsub-vb-cl-ise-px1",
+      "properties": {
+        "wsUrl": "wss://vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/ise/pubsub"
+      }
+    }
+  ]
+}
+
+# Get Access Secret
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccessSecret --cert pxgrid-client.crt --key pxgrid-client.key -d '{"peerNodeName": "~ise-pubsub-vb-cl-ise-px1"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "secret": "nP30k3Ir14Bdte7Y"
+}
+
+# Connect to websocket
+$ websocat -k -vvv --base64 --binary-prefix hex --basic-auth pxgrid-client:nP30k3Ir14Bdte7Y wss://vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/ise/pubsub
+
+# Create STOMP CONNECT command in base64
+$ echo -n -e 'CONNECT\naccept-version:1.2\nhost:~ise-pubsub-vb-cl-ise-px1\n\n\x00'|base64
+Q09OTkVDVAphY2NlcHQtdmVyc2lvbjoxLjIKaG9zdDp+aXNlLXB1YnN1Yi12Yi1jbC1pc2UtcHgxCgoA
+
+# Send connect command
+hexQ09OTkVDVAphY2NlcHQtdmVyc2lvbjoxLjIKaG9zdDp+aXNlLXB1YnN1Yi12Yi1jbC1pc2UtcHgxCgoA
+# Response received
+hexQ09OTkVDVEVECmhlYXJ0LWJlYXQ6MCwwCnZlcnNpb246MS4yCgoA
+
+# Decode response
+$ echo Q09OTkVDVEVECmhlYXJ0LWJlYXQ6MCwwCnZlcnNpb246MS4yCgoA|base64 -d
+CONNECTED
+heart-beat:0,0
+version:1.2
+
+# Create STOMP SUBSCRIBE command in base64
+echo -n -e 'SUBSCRIBE\ndestination:/topic/com.cisco.ise.session\nid:cli\n\n\x00'|base64
+U1VCU0NSSUJFCmRlc3RpbmF0aW9uOi90b3BpYy9jb20uY2lzY28uaXNlLnNlc3Npb24KaWQ6Y2xpCgoA
+
+# Send subscribe command
+hexU1VCU0NSSUJFCmRlc3RpbmF0aW9uOi90b3BpYy9jb20uY2lzY28uaXNlLnNlc3Npb24KaWQ6Y2xpCgoA
+
+# New session received
+hexTUVTU0FHRQpjb250ZW50LWxlbmd0aDo2ODAKZGVzdGluYXRpb246L3RvcGljL2NvbS5jaXNjby5pc2Uuc2Vzc2lvbgptZXNzYWdlLWlkOjE5NTQ0CnN1YnNjcmlwdGlvbjpjbGkKCnsic2Vzc2lvbnMiOlt7InRpbWVzdGFtcCI6IjIwMjItMTEtMTBUMTU6MTk6NTEuMjc1LTA1OjAwIiwic3RhdGUiOiJBVVRIRU5USUNBVEVEIiwidXNlck5hbWUiOiJqc21pdGgiLCJjYWxsaW5nU3RhdGlvbklkIjoiRTc6QjY6QkI6QTM6RUE6OUIiLCJjYWxsZWRTdGF0aW9uSWQiOiI2Njo1NTo0NDozMzoyMjoxMSIsImlwQWRkcmVzc2VzIjpbIjQuMy4yLjMiXSwibWFjQWRkcmVzcyI6IkU3OkI2OkJCOkEzOkVBOjlCIiwiYWROb3JtYWxpemVkVXNlciI6ImpzbWl0aCIsInByb3ZpZGVycyI6WyJOb25lIl0sImVuZHBvaW50Q2hlY2tSZXN1bHQiOiJub25lIiwiaWRlbnRpdHlTb3VyY2VQb3J0U3RhcnQiOjAsImlkZW50aXR5U291cmNlUG9ydEVuZCI6MCwiaWRlbnRpdHlTb3VyY2VQb3J0Rmlyc3QiOjAsIm5ldHdvcmtEZXZpY2VQcm9maWxlTmFtZSI6IkNpc2NvIiwic3NpZCI6IjY2LTU1LTQ0LTMzLTIyLTExIiwibWRtUmVnaXN0ZXJlZCI6ZmFsc2UsIm1kbUNvbXBsaWFudCI6ZmFsc2UsIm1kbURpc2tFbmNyeXB0ZWQiOmZhbHNlLCJtZG1KYWlsQnJva2VuIjpmYWxzZSwibWRtUGluTG9ja2VkIjpmYWxzZSwic2VsZWN0ZWRBdXRoelByb2ZpbGVzIjpbIlBlcm1pdEFjY2VzcyJdLCJhdXRoTWV0aG9kIjoiUEFQX0FTQ0lJIiwiYXV0aFByb3RvY29sIjoiUEFQX0FTQ0lJIn1dLCJzZXF1ZW5jZSI6MTR9AA==
+
+# Decode new message
+echo TUVTU0FHRQpjb250ZW50LWxlbmd0aDo2ODAKZGVzdGluYXRpb246L3RvcGljL2NvbS5jaXNjby5pc2Uuc2Vzc2lvbgptZXNzYWdlLWlkOjE5NTQ0CnN1YnNjcmlwdGlvbjpjbGkKCnsic2Vzc2lvbnMiOlt7InRpbWVzdGFtcCI6IjIwMjItMTEtMTBUMTU6MTk6NTEuMjc1LTA1OjAwIiwic3RhdGUiOiJBVVRIRU5USUNBVEVEIiwidXNlck5hbWUiOiJqc21pdGgiLCJjYWxsaW5nU3RhdGlvbklkIjoiRTc6QjY6QkI6QTM6RUE6OUIiLCJjYWxsZWRTdGF0aW9uSWQiOiI2Njo1NTo0NDozMzoyMjoxMSIsImlwQWRkcmVzc2VzIjpbIjQuMy4yLjMiXSwibWFjQWRkcmVzcyI6IkU3OkI2OkJCOkEzOkVBOjlCIiwiYWROb3JtYWxpemVkVXNlciI6ImpzbWl0aCIsInByb3ZpZGVycyI6WyJOb25lIl0sImVuZHBvaW50Q2hlY2tSZXN1bHQiOiJub25lIiwiaWRlbnRpdHlTb3VyY2VQb3J0U3RhcnQiOjAsImlkZW50aXR5U291cmNlUG9ydEVuZCI6MCwiaWRlbnRpdHlTb3VyY2VQb3J0Rmlyc3QiOjAsIm5ldHdvcmtEZXZpY2VQcm9maWxlTmFtZSI6IkNpc2NvIiwic3NpZCI6IjY2LTU1LTQ0LTMzLTIyLTExIiwibWRtUmVnaXN0ZXJlZCI6ZmFsc2UsIm1kbUNvbXBsaWFudCI6ZmFsc2UsIm1kbURpc2tFbmNyeXB0ZWQiOmZhbHNlLCJtZG1KYWlsQnJva2VuIjpmYWxzZSwibWRtUGluTG9ja2VkIjpmYWxzZSwic2VsZWN0ZWRBdXRoelByb2ZpbGVzIjpbIlBlcm1pdEFjY2VzcyJdLCJhdXRoTWV0aG9kIjoiUEFQX0FTQ0lJIiwiYXV0aFByb3RvY29sIjoiUEFQX0FTQ0lJIn1dLCJzZXF1ZW5jZSI6MTR9AA==|base64 -d
+
+MESSAGE
+content-length:680
+destination:/topic/com.cisco.ise.session
+message-id:19544
+subscription:cli
+
+{"sessions":[{"timestamp":"2022-11-10T15:19:51.275-05:00","state":"AUTHENTICATED","userName":"jsmith","callingStationId":"E7:B6:BB:A3:EA:9B","calledStationId":"66:55:44:33:22:11","ipAddresses":["4.3.2.3"],"macAddress":"E7:B6:BB:A3:EA:9B","adNormalizedUser":"jsmith","providers":["None"],"endpointCheckResult":"none","identitySourcePortStart":0,"identitySourcePortEnd":0,"identitySourcePortFirst":0,"networkDeviceProfileName":"Cisco","ssid":"66-55-44-33-22-11","mdmRegistered":false,"mdmCompliant":false,"mdmDiskEncrypted":false,"mdmJailBroken":false,"mdmPinLocked":false,"selectedAuthzProfiles":["PermitAccess"],"authMethod":"PAP_ASCII","authProtocol":"PAP_ASCII"}],"sequence":14}
+
+{
+  "sessions": [
+    {
+      "timestamp": "2022-11-10T15:19:51.275-05:00",
+      "state": "AUTHENTICATED",
+      "userName": "jsmith",
+      "callingStationId": "E7:B6:BB:A3:EA:9B",
+      "calledStationId": "66:55:44:33:22:11",
+      "ipAddresses": [
+        "4.3.2.3"
+      ],
+      "macAddress": "E7:B6:BB:A3:EA:9B",
+      "adNormalizedUser": "jsmith",
+      "providers": [
+        "None"
+      ],
+      "endpointCheckResult": "none",
+      "identitySourcePortStart": 0,
+      "identitySourcePortEnd": 0,
+      "identitySourcePortFirst": 0,
+      "networkDeviceProfileName": "Cisco",
+      "ssid": "66-55-44-33-22-11",
+      "mdmRegistered": false,
+      "mdmCompliant": false,
+      "mdmDiskEncrypted": false,
+      "mdmJailBroken": false,
+      "mdmPinLocked": false,
+      "selectedAuthzProfiles": [
+        "PermitAccess"
+      ],
+      "authMethod": "PAP_ASCII",
+      "authProtocol": "PAP_ASCII"
+    }
+  ],
+  "sequence": 14
+}
+
+# Create STOMP DISCONNECT command in base64
+$ echo -n -e 'DISCONNECT\nreceipt:123\n\n\x00'|base64
+RElTQ09OTkVDVApyZWNlaXB0OjEyMwoKAA==
+
+# Send disconnect command
+hexRElTQ09OTkVDVApyZWNlaXB0OjEyMwoKAA==
+
+# Response recieved
+hexUkVDRUlQVApyZWNlaXB0LWlkOjEyMwoKAA==
+
+# Decode response
+echo UkVDRUlQVApyZWNlaXB0LWlkOjEyMwoKAA==|base64 -d
+RECEIPT
+receipt-id:123
+
+# Service Lookup for com.cisco.ise.config.trustsec
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceLookup --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"com.cisco.ise.config.trustsec"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.config.trustsec",
+      "nodeName": "~ise-admin-vb-cl-ise-adm1",
+      "properties": {
+        "virtualnetworkTopic": "/topic/com.cisco.ise.config.trustsec.virtualnetwork",
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseUrl": "https://vb-cl-ise-adm1.ciscodemo.net:8910/pxgrid/ise/config/trustsec",
+        "securityGroupVnVlanTopic": "/topic/com.cisco.ise.config.trustsec.security.group.vnvlan",
+        "securityGroupTopic": "/topic/com.cisco.ise.config.trustsec.security.group",
+        "egressPolicyTopic": "/topic/com.cisco.ise.config.trustsec.egress.policy",
+        "securityGroupAclTopic": "/topic/com.cisco.ise.config.trustsec.security.group.acl"
+      }
+    }
+  ]
+}
+
+# Get Access Secret
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccessSecret --cert pxgrid-client.crt --key pxgrid-client.key -d '{"peerNodeName": "~ise-admin-vb-cl-ise-adm1"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' |jq -M
+{
+  "secret": "iGYcSUPZgum4xJnz"
+}
+
+# Get SGTs
+$ curl -s https://pxgrid-client:iGYcSUPZgum4xJnz@vb-cl-ise-adm1.ciscodemo.net:8910/pxgrid/ise/config/trustsec/getSecurityGroups -d '{}' --cacert ../demo-ca.cer -H 'Content-Type: Application/json' | jq -M
+{
+  "totalCount": "17",
+  "version": "1.0.0",
+  "securityGroups": [
+    {
+      "description": "Auditor Security Group",
+      "tag": 9,
+      "timestamp": "2022-08-30T11:37:02.868Z",
+      "id": "934557f0-8c01-11e6-996c-525400b48521",
+      "name": "Auditors"
+    },
+    {
+      "description": "BYOD Security Group",
+      "tag": 15,
+      "timestamp": "2022-08-30T11:37:02.888Z",
+      "id": "935d4cc0-8c01-11e6-996c-525400b48521",
+      "name": "BYOD"
+    },
+    {
+      "description": "Contractor Security Group",
+      "tag": 5,
+      "timestamp": "2022-08-30T11:37:02.898Z",
+      "id": "9370d4c0-8c01-11e6-996c-525400b48521",
+      "name": "Contractors"
+    },
+    {
+      "description": "Developer Security Group",
+      "tag": 8,
+      "timestamp": "2022-08-30T11:37:02.911Z",
+      "id": "93837260-8c01-11e6-996c-525400b48521",
+      "name": "Developers"
+    },
+    {
+      "description": "Development Servers Security Group",
+      "tag": 12,
+      "timestamp": "2022-08-30T11:37:02.921Z",
+      "id": "9396d350-8c01-11e6-996c-525400b48521",
+      "name": "Development_Servers"
+    },
+    {
+      "description": "Employee Security Group",
+      "tag": 4,
+      "timestamp": "2022-08-30T11:37:02.939Z",
+      "id": "93ad6890-8c01-11e6-996c-525400b48521",
+      "name": "Employees"
+    },
+    {
+      "description": "Guest Security Group",
+      "tag": 6,
+      "timestamp": "2022-08-30T11:37:02.95Z",
+      "id": "93c66ed0-8c01-11e6-996c-525400b48521",
+      "name": "Guests"
+    },
+    {
+      "description": "Network Services Security Group",
+      "tag": 3,
+      "timestamp": "2022-08-30T11:37:02.965Z",
+      "id": "93e1bf00-8c01-11e6-996c-525400b48521",
+      "name": "Network_Services"
+    },
+    {
+      "description": "PCI Servers Security Group",
+      "tag": 14,
+      "timestamp": "2022-08-30T11:37:02.976Z",
+      "id": "93f91790-8c01-11e6-996c-525400b48521",
+      "name": "PCI_Servers"
+    },
+    {
+      "description": "Point of Sale Security Group",
+      "tag": 10,
+      "timestamp": "2022-08-30T11:37:02.984Z",
+      "id": "940facd0-8c01-11e6-996c-525400b48521",
+      "name": "Point_of_Sale_Systems"
+    },
+    {
+      "description": "Production Servers Security Group",
+      "tag": 11,
+      "timestamp": "2022-08-30T11:37:02.994Z",
+      "id": "9423aa00-8c01-11e6-996c-525400b48521",
+      "name": "Production_Servers"
+    },
+    {
+      "description": "Production User Security Group",
+      "tag": 7,
+      "timestamp": "2022-08-30T11:37:03.003Z",
+      "id": "9437a730-8c01-11e6-996c-525400b48521",
+      "name": "Production_Users"
+    },
+    {
+      "description": "Quarantine Security Group",
+      "tag": 255,
+      "timestamp": "2022-08-30T11:37:03.013Z",
+      "id": "944b2f30-8c01-11e6-996c-525400b48521",
+      "name": "Quarantined_Systems"
+    },
+    {
+      "description": "Test Servers Security Group",
+      "tag": 13,
+      "timestamp": "2022-08-30T11:37:03.023Z",
+      "id": "94621290-8c01-11e6-996c-525400b48521",
+      "name": "Test_Servers"
+    },
+    {
+      "description": "TrustSec Devices Security Group",
+      "tag": 2,
+      "timestamp": "2022-08-30T11:37:03.034Z",
+      "id": "947832a0-8c01-11e6-996c-525400b48521",
+      "name": "TrustSec_Devices"
+    },
+    {
+      "description": "Unknown Security Group",
+      "tag": 0,
+      "timestamp": "2022-08-30T11:37:03.045Z",
+      "id": "92adf9f0-8c01-11e6-996c-525400b48521",
+      "name": "Unknown"
+    }
+  ],
+  "deletedSecurityGroups": []
+}
+
+# Service Lookup for com.cisco.ise.config.anc
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceLookup --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"com.cisco.ise.config.anc"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.config.anc",
+      "nodeName": "~ise-admin-vb-cl-ise-mnt2",
+      "properties": {
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseUrl": "https://vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/ise/config/anc",
+        "statusTopic": "/topic/com.cisco.ise.config.anc.status"
+      }
+    },
+    {
+      "name": "com.cisco.ise.config.anc",
+      "nodeName": "~ise-admin-vb-cl-ise-mnt1",
+      "properties": {
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseUrl": "https://vb-cl-ise-mnt1.ciscodemo.net:8910/pxgrid/ise/config/anc",
+        "statusTopic": "/topic/com.cisco.ise.config.anc.status"
+      }
+    }
+  ]
+}
+
+# Get Access Secret
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccessSecret --cert pxgrid-client.crt --key pxgrid-client.key -d '{"peerNodeName": "~ise-admin-vb-cl-ise-mnt2"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' |jq -M
+{
+  "secret": "TWYNhlu49JTsOEsZ"
+}
+
+# Create ANC Policy
+$ curl -s https://pxgrid-client:TWYNhlu49JTsOEsZ@vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/ise/config/anc/createPolicy -d '{"name":"Block","actions":["QUARANTINE"]}' --cacert ../demo-ca.cer -H 'Content-Type: Application/json' | jq -M
+{
+  "name": "Block",
+  "actions": [
+    "QUARANTINE"
+  ]
+}
+
+# Assign ANC Policy to Endpoint
+$ curl -s https://pxgrid-client:TWYNhlu49JTsOEsZ@vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/ise/config/anc/applyEndpointByMacAddress -d '{"policyName":"Block","macAddress":"11:22:33:44:55:66"}' --cacert ../demo-ca.cer -H 'Content-Type: Application/json' | jq -M
+{
+  "operationId": "vb-cl-ise-mnt2.ciscodemo.net:0",
+  "macAddress": "11:22:33:44:55:66",
+  "status": "SUCCESS",
+  "policyName": "Block"
+}
