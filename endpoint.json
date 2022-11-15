@@ -1,0 +1,22 @@
+{
+    "opType": "CREATE",
+    "asset": {
+        "assetId": 1,
+        "assetName": "IOT1",
+        "assetIpAddress": "1.2.3.4",
+        "assetMacAddress": "33:44:55:66:77:88",
+        "assetVendor": "CL",
+        "assetHwRevision": "1.0",
+        "assetSwRevision": "2.0",
+        "assetProtocol": "Telnet",
+        "assetProductId": "Wifi-IOT",
+        "assetSerialNumber": "ABC12345",
+        "assetDeviceType": "WiFi",
+        "assetConnectedLinks": [
+            {
+                "key": "wifi1",
+                "value": "ssid1"
+            }
+        ]
+    }
+}

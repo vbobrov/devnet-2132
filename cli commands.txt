@@ -532,3 +532,89 @@ $ curl -s https://pxgrid-client:TWYNhlu49JTsOEsZ@vb-cl-ise-mnt2.ciscodemo.net:89
   "status": "SUCCESS",
   "policyName": "Block"
 }
+
+# Register Service
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceRegister --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"com.cisco.endpoint.asset","properties":{"wsPubsubService":"com.cisco.ise.pubsub","assetTopic":"/topic/com.cisco.endpoint.asset"}}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "id": "28cd8b3c-20ca-4630-a230-92e8d8ce3e2a",
+  "reregisterTimeMillis": 300000
+}
+
+# Service Lookup com.cisco.ise.pubsub
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceLookup --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"com.cisco.ise.pubsub"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.pubsub",
+      "nodeName": "~ise-pubsub-vb-cl-ise-px1",
+      "properties": {
+        "wsUrl": "wss://vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/ise/pubsub"
+      }
+    },
+    {
+      "name": "com.cisco.ise.pubsub",
+      "nodeName": "~ise-pubsub-vb-cl-ise-px2",
+      "properties": {
+        "wsUrl": "wss://vb-cl-ise-px2.ciscodemo.net:8910/pxgrid/ise/pubsub"
+      }
+    }
+  ]
+}
+
+# Get Access Secret
+$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccessSecret --cert pxgrid-client.crt --key pxgrid-client.key -d '{"peerNodeName": "~ise-pubsub-vb-cl-ise-px1"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "secret": "nP30k3Ir14Bdte7Y"
+}
+
+# Connect to websocket
+$ websocat -k --base64 --binary-prefix hex --basic-auth pxgrid-client:nP30k3Ir14Bdte7Y wss://vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/ise/pubsub
+
+# Create STOMP CONNECT command in base64
+$ echo -n -e 'CONNECT\naccept-version:1.2\nhost:~ise-pubsub-vb-cl-ise-px1\n\n\x00'|base64
+Q09OTkVDVAphY2NlcHQtdmVyc2lvbjoxLjIKaG9zdDp+aXNlLXB1YnN1Yi12Yi1jbC1pc2UtcHgxCgoA
+
+# Send connect command
+hexQ09OTkVDVAphY2NlcHQtdmVyc2lvbjoxLjIKaG9zdDp+aXNlLXB1YnN1Yi12Yi1jbC1pc2UtcHgxCgoA
+# Response received
+hexQ09OTkVDVEVECmhlYXJ0LWJlYXQ6MCwwCnZlcnNpb246MS4yCgoA
+
+# Decode Output
+echo Q09OTkVDVEVECmhlYXJ0LWJlYXQ6MCwwCnZlcnNpb246MS4yCgoA|base64 -d
+CONNECTED
+heart-beat:0,0
+version:1.2
+
+# Prepare STOMP SEND command
+$ cat endpoint.json
+{
+    "opType": "CREATE",
+    "asset": {
+        "assetId": 1,
+        "assetName": "IOT1",
+        "assetIpAddress": "1.2.3.4",
+        "assetMacAddress": "33:44:55:66:77:88",
+        "assetVendor": "CL",
+        "assetHwRevision": "1.0",
+        "assetSwRevision": "2.0",
+        "assetProtocol": "Telnet",
+        "assetProductId": "Wifi-IOT",
+        "assetSerialNumber": "ABC12345",
+        "assetDeviceType": "WiFi",
+        "assetConnectedLinks": [
+            {
+                "key": "wifi1",
+                "value": "ssid1"
+            }
+        ]
+}
+
+$ ASSET=`sed -E 's/^ +//g' <endpoint.json |tr -d '\n'`;LEN=`echo -n $ASSET|wc -c|tr -d " "`;echo -n -e "SEND\\ndestination:/topic/com.cisco.endpoint.asset\\ncontent-length:$LEN\\n\\n$ASSET\x00"
+SEND
+destination:/topic/com.cisco.endpoint.asset
+content-length:373
+
+{"opType": "CREATE","asset": {"assetId": 1,"assetName": "IOT1","assetIpAddress": "1.2.3.4","assetMacAddress": "22:33:44:55:66:77","assetVendor": "CL","assetHwRevision": "1.0","assetHwRevision": "2.0","assetProtocol": "Telnet","assetProductId": "Wifi-IOT","assetSerialNumber": "ABC12345","assetDeviceType": "WiFi","assetConnectedLinks": [{"key": "wifi1","value": "ssid1"}]}}
+
+$ ASSET=`sed -E 's/^ +//g' <endpoint.json |tr -d '\n'`;LEN=`echo -n $ASSET|wc -c|tr -d " "`;echo -n -e "SEND\\ndestination:/topic/com.cisco.endpoint.asset\\ncontent-length:$LEN\\n\\n$ASSET\x00"|base64
+U0VORApkZXN0aW5hdGlvbjpjb20uY2lzY28uZW5kcG9pbnQuYXNzZXQKY29udGVudC1sZW5ndGg6MzczCgp7Im9wVHlwZSI6ICJDUkVBVEUiLCJhc3NldCI6IHsiYXNzZXRJZCI6IDEsImFzc2V0TmFtZSI6ICJJT1QxIiwiYXNzZXRJcEFkZHJlc3MiOiAiMS4yLjMuNCIsImFzc2V0TWFjQWRkcmVzcyI6ICIyMjozMzo0NDo1NTo2Njo3NyIsImFzc2V0VmVuZG9yIjogIkNMIiwiYXNzZXRId1JldmlzaW9uIjogIjEuMCIsImFzc2V0SHdSZXZpc2lvbiI6ICIyLjAiLCJhc3NldFByb3RvY29sIjogIlRlbG5ldCIsImFzc2V0UHJvZHVjdElkIjogIldpZmktSU9UIiwiYXNzZXRTZXJpYWxOdW1iZXIiOiAiQUJDMTIzNDUiLCJhc3NldERldmljZVR5cGUiOiAiV2lGaSIsImFzc2V0Q29ubmVjdGVkTGlua3MiOiBbeyJrZXkiOiAid2lmaTEiLCJ2YWx1ZSI6ICJzc2lkMSJ9XX19AA==
