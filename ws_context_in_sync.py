@@ -38,7 +38,7 @@ r.raise_for_status()
 secret=r.json()["secret"]
 ssl_context=ssl.create_default_context()
 ssl_context.load_verify_locations(cafile=".demo-ca.cer")
-ws=websocket.create_connection(ws_url, #"ws://websocket-echo.com",
+ws=websocket.create_connection(ws_url,
     sslopt={"context": ssl_context},
     header={"Authorization": "Basic "+b64encode((f"pxgrid-client:{secret}").encode()).decode()}
 )
