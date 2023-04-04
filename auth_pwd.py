@@ -1,20 +1,25 @@
 import requests
 import json
 from time import sleep
-r=requests.post(f"https://vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccountCreate",
-    cert=(".pxgrid-client.crt",".pxgrid-client.key"),
-    verify=".demo-ca.cer",
+
+pxgrid_node="vb-cl-ise-px1.ciscodemo.net"
+username="pwd-client"
+rootca_file=".demo-ca.cer"
+pxgrid_url=f"https://{pxgrid_node}:8910/pxgrid/control"
+
+r=requests.post(f"{pxgrid_url}/AccountCreate",
+    verify=rootca_file,
     json={
-        "nodeName": "pwd-client"
+        "nodeName": username
     }
 )
 r.raise_for_status()
 password=r.json()["password"]
 
 while True:
-    r=requests.post(f"https://vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccountActivate",
-        verify=".demo-ca.cer",
-        auth=("pwd-client",password),
+    r=requests.post(f"{pxgrid_url}/AccountActivate",
+        verify=rootca_file,
+        auth=(username,password),
         json={}
     )
     r.raise_for_status()
