@@ -336,8 +336,28 @@ echo UkVDRUlQVApyZWNlaXB0LWlkOjEyMwoKAA==|base64 -d
 RECEIPT
 receipt-id:123
 
-# Service Lookup for com.cisco.ise.config.trustsec
+# Service Lookup for com.cisco.ise.config.trustsec using certificate
 $ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceLookup --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"com.cisco.ise.config.trustsec"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
+{
+  "services": [
+    {
+      "name": "com.cisco.ise.config.trustsec",
+      "nodeName": "~ise-admin-vb-cl-ise-adm1",
+      "properties": {
+        "virtualnetworkTopic": "/topic/com.cisco.ise.config.trustsec.virtualnetwork",
+        "wsPubsubService": "com.cisco.ise.pubsub",
+        "restBaseUrl": "https://vb-cl-ise-adm1.ciscodemo.net:8910/pxgrid/ise/config/trustsec",
+        "securityGroupVnVlanTopic": "/topic/com.cisco.ise.config.trustsec.security.group.vnvlan",
+        "securityGroupTopic": "/topic/com.cisco.ise.config.trustsec.security.group",
+        "egressPolicyTopic": "/topic/com.cisco.ise.config.trustsec.egress.policy",
+        "securityGroupAclTopic": "/topic/com.cisco.ise.config.trustsec.security.group.acl"
+      }
+    }
+  ]
+}
+
+# Service Lookup for com.cisco.ise.config.trustsec using password
+$ curl -s https://pwd-client:07WwV7CXmt8fPmKc@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/ServiceLookup -d '{"name":"com.cisco.ise.config.trustsec"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' | jq -M
 {
   "services": [
     {
@@ -362,8 +382,138 @@ $ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/con
   "secret": "iGYcSUPZgum4xJnz"
 }
 
-# Get SGTs
-$ curl -s https://pxgrid-client:iGYcSUPZgum4xJnz@vb-cl-ise-adm1.ciscodemo.net:8910/pxgrid/ise/config/trustsec/getSecurityGroups -d '{}' --cacert ../demo-ca.cer -H 'Content-Type: Application/json' | jq -M
+
+# Get SGTs using certificate authentication
+curl -s https://pxgrid-client:none@vb-cl-ise-adm1.ciscodemo.net:8910/pxgrid/ise/config/trustsec/getSecurityGroups -d '{}' --cert .pxgrid-client.crt --key .pxgrid-client.key --cacert .demo-ca.cer -H 'Content-Type: Application/json'  | jq -M
+{
+  "totalCount": "17",
+  "version": "1.0.0",
+  "securityGroups": [
+    {
+      "description": "Any Security Group",
+      "tag": 65535,
+      "timestamp": "2022-08-30T11:37:02.359Z",
+      "id": "92bb1950-8c01-11e6-996c-525400b48521",
+      "name": "ANY"
+    },
+    {
+      "description": "Auditor Security Group",
+      "tag": 9,
+      "timestamp": "2022-08-30T11:37:02.868Z",
+      "id": "934557f0-8c01-11e6-996c-525400b48521",
+      "name": "Auditors"
+    },
+    {
+      "description": "BYOD Security Group",
+      "tag": 15,
+      "timestamp": "2022-08-30T11:37:02.888Z",
+      "id": "935d4cc0-8c01-11e6-996c-525400b48521",
+      "name": "BYOD"
+    },
+    {
+      "description": "Contractor Security Group",
+      "tag": 5,
+      "timestamp": "2022-08-30T11:37:02.898Z",
+      "id": "9370d4c0-8c01-11e6-996c-525400b48521",
+      "name": "Contractors"
+    },
+    {
+      "description": "Developer Security Group",
+      "tag": 8,
+      "timestamp": "2022-08-30T11:37:02.911Z",
+      "id": "93837260-8c01-11e6-996c-525400b48521",
+      "name": "Developers"
+    },
+    {
+      "description": "Development Servers Security Group",
+      "tag": 12,
+      "timestamp": "2022-08-30T11:37:02.921Z",
+      "id": "9396d350-8c01-11e6-996c-525400b48521",
+      "name": "Development_Servers"
+    },
+    {
+      "description": "Employee Security Group",
+      "tag": 4,
+      "timestamp": "2022-08-30T11:37:02.939Z",
+      "id": "93ad6890-8c01-11e6-996c-525400b48521",
+      "name": "Employees"
+    },
+    {
+      "description": "Guest Security Group",
+      "tag": 6,
+      "timestamp": "2022-08-30T11:37:02.95Z",
+      "id": "93c66ed0-8c01-11e6-996c-525400b48521",
+      "name": "Guests"
+    },
+    {
+      "description": "Network Services Security Group",
+      "tag": 3,
+      "timestamp": "2022-08-30T11:37:02.965Z",
+      "id": "93e1bf00-8c01-11e6-996c-525400b48521",
+      "name": "Network_Services"
+    },
+    {
+      "description": "PCI Servers Security Group",
+      "tag": 14,
+      "timestamp": "2022-08-30T11:37:02.976Z",
+      "id": "93f91790-8c01-11e6-996c-525400b48521",
+      "name": "PCI_Servers"
+    },
+    {
+      "description": "Point of Sale Security Group",
+      "tag": 10,
+      "timestamp": "2022-08-30T11:37:02.984Z",
+      "id": "940facd0-8c01-11e6-996c-525400b48521",
+      "name": "Point_of_Sale_Systems"
+    },
+    {
+      "description": "Production Servers Security Group",
+      "tag": 11,
+      "timestamp": "2022-08-30T11:37:02.994Z",
+      "id": "9423aa00-8c01-11e6-996c-525400b48521",
+      "name": "Production_Servers"
+    },
+    {
+      "description": "Production User Security Group",
+      "tag": 7,
+      "timestamp": "2022-08-30T11:37:03.003Z",
+      "id": "9437a730-8c01-11e6-996c-525400b48521",
+      "name": "Production_Users"
+    },
+    {
+      "description": "Quarantine Security Group",
+      "tag": 255,
+      "timestamp": "2022-08-30T11:37:03.013Z",
+      "id": "944b2f30-8c01-11e6-996c-525400b48521",
+      "name": "Quarantined_Systems"
+    },
+    {
+      "description": "Test Servers Security Group",
+      "tag": 13,
+      "timestamp": "2022-08-30T11:37:03.023Z",
+      "id": "94621290-8c01-11e6-996c-525400b48521",
+      "name": "Test_Servers"
+    },
+    {
+      "description": "TrustSec Devices Security Group",
+      "tag": 2,
+      "timestamp": "2022-08-30T11:37:03.034Z",
+      "id": "947832a0-8c01-11e6-996c-525400b48521",
+      "name": "TrustSec_Devices"
+    },
+    {
+      "description": "Unknown Security Group",
+      "tag": 0,
+      "timestamp": "2022-08-30T11:37:03.045Z",
+      "id": "92adf9f0-8c01-11e6-996c-525400b48521",
+      "name": "Unknown"
+    }
+  ],
+  "deletedSecurityGroups": []
+}
+
+# Get SGTs using password authentication
+$ curl -s https://pwd-client:iGYcSUPZgum4xJnz@vb-cl-ise-adm1.ciscodemo.net:8910/pxgrid/ise/config/trustsec/getSecurityGroups -d '{}' --cacert ../demo-ca.cer -H 'Content-Type: Application/json' | jq -M
 {
   "totalCount": "17",
   "version": "1.0.0",
@@ -509,14 +659,8 @@ $ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/con
   ]
 }
 
-# Get Access Secret
-$ curl -s https://pxgrid-client:None@vb-cl-ise-px1.ciscodemo.net:8910/pxgrid/control/AccessSecret --cert pxgrid-client.crt --key pxgrid-client.key -d '{"peerNodeName": "~ise-admin-vb-cl-ise-mnt2"}' --cacert ../demo-ca.cer -H 'Content-Type: application/json' |jq -M
-{
-  "secret": "TWYNhlu49JTsOEsZ"
-}
-
 # Create ANC Policy
-$ curl -s https://pxgrid-client:TWYNhlu49JTsOEsZ@vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/ise/config/anc/createPolicy -d '{"name":"Block","actions":["QUARANTINE"]}' --cacert ../demo-ca.cer -H 'Content-Type: Application/json' | jq -M
+$ curl -s https://pxgrid-client:TWYNhlu49JTsOEsZ@vb-cl-ise-mnt2.ciscodemo.net:8910/pxgrid/ise/config/anc/createPolicy --cert pxgrid-client.crt --key pxgrid-client.key -d '{"name":"Block","actions":["QUARANTINE"]}' --cacert ../demo-ca.cer -H 'Content-Type: Application/json' | jq -M
 {
   "name": "Block",
   "actions": [
