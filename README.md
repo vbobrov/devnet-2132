@@ -1,1 +1,1 @@
-This is a repository with example code for DEVNET-2032 session
+This is a repository with example code for DEVNET-2132 session
