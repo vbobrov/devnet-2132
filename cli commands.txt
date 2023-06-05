@@ -3,6 +3,7 @@
 echo User-Name:=jsmith,User-Password=cisco,Calling-Station-Id=`echo $RANDOM|md5sum|head -c 12`,Called-Station-Id=66-55-44-33-22-11,Framed-IP-Address=4.3.2.3|radclient -x 10.207.216.147 auth cisco
 
 # Create pkcs12 file from certificate and private key
+openssl pkcs12 -export -in pxgrid-client.crt -inkey pxgrid-client.key > pxgrid-client.p12
 Enter Export Password:
 Verifying - Enter Export Password:
 
@@ -751,6 +752,7 @@ $ cat endpoint.json
                 "value": "ssid1"
             }
         ]
+    }
 }
 
 $ ASSET=`sed -E 's/^ +//g' <endpoint.json |tr -d '\n'`;LEN=`echo -n $ASSET|wc -c|tr -d " "`;echo -n -e "SEND\\ndestination:/topic/com.cisco.endpoint.asset\\ncontent-length:$LEN\\n\\n$ASSET\x00"
